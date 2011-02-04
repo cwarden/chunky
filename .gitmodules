@@ -1,0 +1,6 @@
+[submodule "lib/operetta"]
+	path = lib/operetta
+	url = https://github.com/tricknik/node-operetta.git
+[submodule "lib/tav"]
+	path = lib/tav
+	url = https://github.com/akaspin/tav.git
