@@ -4,3 +4,12 @@
 [submodule "lib/tav"]
 	path = lib/tav
 	url = https://github.com/akaspin/tav.git
+[submodule "lib/node-optimist"]
+	path = lib/node-optimist
+	url = http://github.com/substack/node-optimist.git
+[submodule "lib/nomnomargs"]
+	path = lib/nomnomargs
+	url = https://github.com/harthur/nomnomargs.git
+[submodule "lib/trollopjs"]
+	path = lib/trollopjs
+	url = https://github.com/bentomas/trollopjs.git
