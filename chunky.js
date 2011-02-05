@@ -6,9 +6,9 @@ const VERSION = 0.01;
 var trollopjs = require('trollopjs');
 var Parser = trollopjs.Parser;
 var parser = new Parser();
-parser.opt('timeout', "Timeout", {dflt: 3});
-parser.opt('buffer', "Buffer", {dflt: 4096});
-parser.opt('help', 'Help');
+parser.opt('timeout', " Timeout", {dflt: 3});
+parser.opt('buffer', " Buffer Size", {dflt: 4096});
+parser.opt('help');
 parser.opt('version');
 try {
    opts = parser.parse();
@@ -35,7 +35,16 @@ try {
 }
 
 console.log(opts);
-console.log(process.ARGV);
+console.log(parser.leftovers);
+
+var command, commandArgs, child;
+// trollopjs leaves nodejs interpreter, the name of this script, and everything
+// after -- on the command line in parser.leftovers
+if (command = parser.leftovers[2]) {
+	console.log('command is ' + command);
+	commandArgs = parser.leftovers.slice(3);
+	var spawn = require('child_process').spawn;
+}
 
 var stdin = process.openStdin();
 
@@ -46,25 +55,37 @@ var bufLength = 0;
 
 var inputTimeout;
 
+var flushBuffer = function() {
+	if (command) {
+		child = spawn(command, commandArgs);
+		child.stdin.write(buf.slice(0, bufLength));
+		child.stdout.on('data', function(data) {
+			sys.print(command + ' output: ' + data);
+		});
+		child.stdin.end();
+	} else {
+		process.stdout.write('data: ' + buf.slice(0, bufLength));
+	}
+	// reset buffer
+	bufLength = 0;
+};
+
+// TODO:  handle case where chunk > opts.buffer
 stdin.on('data', function (chunk) {
-	console.info('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
-	console.info('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
+	sys.debug('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
+	sys.debug('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
+	// Flush the buffer if the chunk would cause an overflow
+	if (bufLength + chunk.length > opts.buffer) {
+		flushBuffer();
+	}
 	chunk.copy(buf, bufLength, 0);
 	bufLength += chunk.length;
-// pause stdin stream if buffer is full
-// stdin.pause();
-// stdin.resume();
+
+	// (re)set the timer to flush the buffer
 	if (inputTimeout) {
 		clearTimeout(inputTimeout);
 	}
-	inputTimeout = setTimeout(function() {
-		if (! opts.command) {
-			process.stdout.write('data: ' + buf.slice(0, bufLength));
-		} else {
-		}
-		// reset buffer
-		bufLength = 0;
-	}, opts.timeout*1000);
+	inputTimeout = setTimeout(flushBuffer, opts.timeout*1000);
 });
 
 stdin.on('end', function () {
