@@ -8,10 +8,14 @@ var Parser = trollopjs.Parser;
 var parser = new Parser();
 parser.opt('timeout', " Timeout", {dflt: 3});
 parser.opt('buffer', " Buffer Size", {dflt: 4096});
+parser.opt('debug');
 parser.opt('help');
 parser.opt('version');
 try {
    opts = parser.parse();
+	// trollopjs leaves nodejs interpreter, the name of this script, and everything
+	// after -- on the command line in parser.leftovers
+	args = parser.leftovers.slice(2);
 } catch (err) {
 	if (err == trollopjs.HelpNeeded) {
 		var help = "chunky: read from stdin, buffer the input, and write it out in chunks\n" +
@@ -34,15 +38,16 @@ try {
 	}
 }
 
-console.log(opts);
-console.log(parser.leftovers);
+if (opts.debug) {
+	console.log('OPTIONS:');
+	console.log(opts);
+	console.log('COMMAND:');
+	console.log(args);
+}
 
 var command, commandArgs, child;
-// trollopjs leaves nodejs interpreter, the name of this script, and everything
-// after -- on the command line in parser.leftovers
-if (command = parser.leftovers[2]) {
-	console.log('command is ' + command);
-	commandArgs = parser.leftovers.slice(3);
+if (command = args[0]) {
+	commandArgs = args.slice(1);
 	var spawn = require('child_process').spawn;
 }
 
@@ -60,7 +65,7 @@ var flushBuffer = function() {
 		child = spawn(command, commandArgs);
 		child.stdin.write(buf.slice(0, bufLength));
 		child.stdout.on('data', function(data) {
-			sys.print(command + ' output: ' + data);
+			sys.print(data);
 		});
 		child.stdin.end();
 	} else {
@@ -72,8 +77,8 @@ var flushBuffer = function() {
 
 // TODO:  handle case where chunk > opts.buffer
 stdin.on('data', function (chunk) {
-	sys.debug('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
-	sys.debug('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
+	opts.debug && sys.debug('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
+	opts.debug && sys.debug('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
 	// Flush the buffer if the chunk would cause an overflow
 	if (bufLength + chunk.length > opts.buffer) {
 		flushBuffer();
