@@ -2,34 +2,6 @@
 require.paths.unshift(__dirname + '/lib');
 var sys = require('sys');
 const VERSION = 0.01;
-/*
-require.paths.unshift(__dirname + '/lib/operetta');
-
-// Set command-line options with default values
-var opts = require('tav').set({
-	buffer: {
-		note: 'Buffer size:  Output will be written if this many bytes has been read from stdin (default: 4096 bytes)',
-		value: 4096
-	},
-	timeout: {
-		note: 'Timeout:  Output will be written after this many seconds if we have buffered any input and haven\'t yet filled the buffer (default: 3 seconds)',
-		value: 3
-	},
-	command: {
-		note: 'Command to run:  Run this command and write to its stdin instead of writing to stdout',
-		value: null
-	}
-}, "chunky: buffer input and write it out in chunks\nUsage: chunky [OPTION]... -- [COMMAND] [ARG]...\n");
-console.log(opts, opts.args);
-
-var Operetta = require("operetta").Operetta;
-operetta = new Operetta();
-operetta.parameters(['-b','--buffer'], "Database");
-operetta.parameters(['-t','--timeout'], "Timeout");
-operetta.start(function(values) {
-	console.log(values);
-});
-*/
 
 var trollopjs = require('trollopjs');
 var Parser = trollopjs.Parser;
@@ -61,15 +33,7 @@ try {
 		process.exit(1);
 	}
 }
-// console.log(parser);
-// console.log(parser.leftovers);
 
-/*
-var opts = require('trollopjs').options(function() {
-  this.opt('timeout', "Timeout", {dflt: 3});
-  this.opt('buffer', "Buffer", {dflt: 4096});
-});
-*/
 console.log(opts);
 console.log(process.ARGV);
 
