@@ -69,20 +69,21 @@ var flushBuffer = function() {
 		});
 		child.stdin.end();
 	} else {
-		process.stdout.write('data: ' + buf.slice(0, bufLength));
+		process.stdout.write(buf.slice(0, bufLength));
 	}
 	// reset buffer
 	bufLength = 0;
 };
 
-// TODO:  handle case where chunk > opts.buffer
 stdin.on('data', function (chunk) {
-	opts.debug && sys.debug('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
-	opts.debug && sys.debug('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
 	// Flush the buffer if the chunk would cause an overflow
 	if (bufLength + chunk.length > opts.buffer) {
+		opts.debug && sys.debug('New data would overflow buffer.  Flushing immediately.');
 		flushBuffer();
 	}
+	opts.debug && sys.debug('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
+	opts.debug && sys.debug('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
+	// TODO:  if chunk > opts.buffer, bypass buffer
 	chunk.copy(buf, bufLength, 0);
 	bufLength += chunk.length;
 
