@@ -98,5 +98,9 @@ stdin.on('data', function (chunk) {
 });
 
 stdin.on('end', function () {
-	// process.stdout.write('end');
+	opts.debug && sys.debug('stdin closed.  nothing else is coming in so no need to wait for timeout.');
+	if (inputTimeout) {
+		clearTimeout(inputTimeout);
+	}
+	flushBuffer();
 });
