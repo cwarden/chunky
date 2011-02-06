@@ -61,6 +61,9 @@ var bufLength = 0;
 var inputTimeout;
 
 var flushBuffer = function() {
+	if (0 == bufLength) {
+		return;
+	}
 	if (command) {
 		child = spawn(command, commandArgs);
 		child.stdin.write(buf.slice(0, bufLength));
