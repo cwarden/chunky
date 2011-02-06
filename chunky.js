@@ -79,21 +79,38 @@ var flushBuffer = function() {
 };
 
 stdin.on('data', function (chunk) {
-	// Flush the buffer if the chunk would cause an overflow
-	if (bufLength + chunk.length > opts.buffer) {
-		opts.debug && sys.debug('New data would overflow buffer.  Flushing immediately.');
-		flushBuffer();
-	}
-	opts.debug && sys.debug('Read data.  Will write it out in ' + opts.timeout + ' seconds if nothing else comes in');
-	opts.debug && sys.debug('Writing ' + chunk.length + ' bytes to ' + bufLength + ' in buffer');
-	// TODO:  if chunk > opts.buffer, bypass buffer
-	chunk.copy(buf, bufLength, 0);
-	bufLength += chunk.length;
-
 	// (re)set the timer to flush the buffer
 	if (inputTimeout) {
 		clearTimeout(inputTimeout);
 	}
+	// Flush the buffer if the chunk would cause an overflow
+	if (bufLength + chunk.length > opts.buffer) {
+		if (bufLength > 0) {
+			// there's already something in the buffer so flush it
+			opts.debug && sys.debug('New data would overflow buffer.  Flushing immediately.');
+			flushBuffer();
+		}
+		if (chunk.length > opts.buffer) {
+			opts.debug && sys.debug('Read data bigger than buffer.  Bypassing buffer.');
+			// TODO: refactor to avoid redundancy with flushBuffer
+			if (command) {
+				child = spawn(command, commandArgs);
+				child.stdin.write(chunk);
+				child.stdout.on('data', function(data) {
+					sys.print(data);
+				});
+				child.stdin.end();
+			} else {
+				process.stdout.write(chunk);
+			}
+			// nothing else to do since we're not using the buffer for this data
+			return;
+		}
+	}
+	opts.debug && sys.debug('Read ' + chunk.length + ' bytes into buffer at position ' + bufLength + '.\nWill write it out in ' + opts.timeout + ' seconds if nothing else comes in.');
+	chunk.copy(buf, bufLength, 0);
+	bufLength += chunk.length;
+
 	inputTimeout = setTimeout(flushBuffer, opts.timeout*1000);
 });
 
