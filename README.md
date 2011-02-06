@@ -1,6 +1,8 @@
+## chunky
+
 chunky reads from stdin and writes to stdout in chunks, either when its
 buffer gets full or a timeout passes with no new input.  It can also spawn a
-new process for each chunk that it outputs and pass the chunk to this processes
+new process for each chunk that it outputs and pass the chunk to this process's
 stdin.
 
 
