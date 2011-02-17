@@ -9,6 +9,12 @@ stdin.
 ### Dependencies:
 	chunky is written in JavaScript for [node](https://github.com/ry/node).
 
+### Getting Started:
+	$ git clone git://github.com/cwarden/chunky.git
+	$ cd chunky
+	$ git submodule update --init
+	$ ./chunky.js -h
+
 ### Usage:
 	Usage: chunky [OPTION]... -- [COMMAND] [ARG]...
 
